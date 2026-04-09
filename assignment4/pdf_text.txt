@@ -1,0 +1,104 @@
+MIT CSAIL
+6.s978 Deep Generative Models
+Fall 2024
+Problem Set 4
+Posted: Tuesday, Oct. 22, 2024
+Due: Tuesday 11:59 pm, Nov. 05, 2024
+We provide a Python notebook with the code to be completed. You can run it locally or on
+Google Colab. To use Colab, upload it to Google Drive and double-click the notebook (or
+right-click and select Open with Google Colaboratory), which will allow you to complete the
+problems without setting up your own environment.
+Submission Instructions: Please submit two files on Canvas: Submit (1) Your report
+named kerberos.pdf which should include your answers to all required questions with
+images/plots showing your results as well as the code you wrote (e.g., using screenshots); (2)
+The provided Python notebook with the relevant source code and with all the cells run.
+Attention: If you fail to include your code in your report in your submission, we
+will not be able to give you credit for your code, so please do not forget.
+Late Submission Policy: If your Problem Set is submitted within 7 days of the original
+deadline, you will receive partial credit. Such submissions will be penalized by a multiplicative
+coefficient that linearly decreases from 1 to 0.5, step-wise on each day’s 11:59pm cutoff.
+In this problem set, you will be experimenting with GANs using PyTorch. To reduce training
+time, we recommend using GPU acceleration.
+Colab comes with free GPU support.
+On
+Colab, select GPU as your runtime type as follows:
+Runtime →Change runtime type →Hardware accelerator →GPU →Save.
+If you exceed your GPU usage limit on Colab, don’t fret. You can also complete your problem
+set using a regular CPU in a reasonable amount of time.
+Problem 0 Notebook Submission, .ipynb version (1 point, required)
+Problem 1 DDPM on MNIST (40 points)
+In this problem set, you will implement a Denoising Diffusion Probabilistic Model (DDPM)
+for the MNIST dataset. The DDPM is a generative model that progressively corrupts a data
+sample through a series of noise additions (forward process) and then learns to reverse this
+process to generate new samples (reverse process). This assignment will guide you through
+implementing key components of DDPM and training the model on MNIST.
+The forward process in DDPM progressively adds Gaussian noise to an image over T timesteps.
+1
+The noise schedule is controlled by a series of variance values βt, which determine how much
+noise is added at each timestep.
+The key quantities for the forward process contain: βt: the variance schedule for each timestep,
+and ¯αt: the cumulative product of αt up to timestep t.
+The mathematical formulation for these terms is as follows:
+βt = βmin + t · βmax −βmin
+T −1
+,
+t = 0, 1, 2, . . . , T −1
+where βmin and βmax are hyperparameters controlling the noise at the first and final timesteps.
+We define αt and ¯αt as:
+αt = 1 −βt
+¯αt =
+tY
+i=1
+αi
+(a) Implement the ddpm schedules() function.
+The forward process of DDPM gradually adds noise to the data at each timestep t. Given a
+data sample x0 and a timestep t, the noisy version xt can be computed as:
+xt = √¯αtx0 +
+√
+1 −¯αtϵ,
+ϵ ∼N(0, I)
+Here, ϵ is Gaussian noise sampled at each timestep. You will need to use the precomputed
+values of ¯αt from the ddpm schedules() function.
+(b) Implement forward() to return xt given x0 and timestep t.
+Given xT ∼N(0, I) (a pure Gaussian noise), the reverse process can be written as:
+xt−1 =
+1
+√αt
+
+xt −1 −αt
+√1 −¯αt
+ϵθ(xt, t)
+
++ σtz,
+z ∼N(0, I)
+where σt is related to the variance at each step.
+(c) Implement sample() to generate new samples by iteratively applying the reverse
+process starting from xT .
+(d) Train the DDPM model on the MNIST dataset using the code provided.
+Problem 2 Ablation Study of DDPM on MNIST (30 points)
+2
+You will investigate the performance of DDPM on MNIST under varying conditions. Specif-
+ically, you will implement two modifications:
+1. Vary the number of timesteps to 2000 and 500 and observe the effect on generation
+quality.
+2. Implement a resampling schedule for inference with 50 and 100 steps instead of 1000-step
+used during training.
+For each experiment, train the DDPM on the MNIST dataset, and evaluate the
+quality of the generated images. Compare the results of each experiment to the
+baseline DDPM trained in Problem 1.
+Problem 3 Continuous-time Stochastic Process (40 points)
+Figure 1: Continuous-time Stochastic Process.
+In this problem you will implement a toy model of continuous-time stochastic process, pro-
+ducing a figure similar to Figure 1. We will follow the notations in the paper of “Score-Based
+Generative Modeling through Stochastic Differential Equations” (https://arxiv.org/pdf/
+2011.13456). Read carefully the Appendix C about the SDE formulation of DDPM. Assume
+the data distribution p(x(0)) = P2
+i=1 πiN(x(0); µi, σi), x ∈R is a mixture of two gaussians.
+(a) Write the formula for p(x(t)) =
+R
+p(x(t)|x(0))p(x(0))dx0 in terms of t, βmin, and
+βmax.
+(b) Calculate the analytical form of ∇xt log pt(x). Note that in practice this term is
+being learned by the neural network in the SDE formulation.
+(c) Implement both functions in code and visualize the forward and reverse SDE.
+3

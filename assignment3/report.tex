@@ -1,0 +1,172 @@
+\documentclass[11pt,UTF8]{ctexart}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{float}
+\geometry{a4paper, margin=1in}
+
+\title{MIT 6.S978: 深度生成模型 \\ Problem Set 3 实验报告}
+\author{你的名字 / Kerberos: [在这里填入]}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{问题 1：基于 MNIST 的无条件 GAN}
+\subsection*{实现细节}
+无条件 GAN (Unconditional GAN) 使用了全连接层（多层感知机）进行实现。生成器 (Generator) 接收一个 100 维的噪声向量 $\mathbf{z}$，并将其依次通过特征大小为 128、256 和 512 的隐藏层。这些隐藏层均使用 LeakyReLU 激活函数，最后连接一个输出 784 维度的线性层，并采用 Tanh 激活函数，以便将生成的图像像素值映射到 $[-1, 1]$ 范围内。判别器 (Discriminator) 接收 784 维的展平图像，将其依次处理通过特征大小为 512、256 和 128 的多个层，期间除了使用 LeakyReLU 激活函数外，还引入了 Dropout（丢失率=0.3）进行正则化，最后通过 Sigmoid 激活函数输出图像为真实图像的概率估值。此外，两者均未使用 Batch Normalization。
+
+\subsection*{实验结果}
+% TODO: 在此处插入损失曲线和生成图像的截图
+\begin{figure}[H]
+    \centering
+    \rule{10cm}{5cm} % 占位符，请删除这行代码并使用下方的 \includegraphics
+    % \includegraphics[width=0.8\textwidth]{p1_loss.png}
+    \caption{无条件 GAN 的 Loss 曲线 (判别器 Discriminator 与 生成器 Generator)}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \rule{10cm}{5cm} % 占位符
+    % \includegraphics[width=0.6\textwidth]{p1_images.png}
+    \caption{通过基线模型 (Baseline Unconditional GAN) 生成的 MNIST 样本图}
+\end{figure}
+
+\section*{问题 2：无条件 GAN 的消融实验 (Ablation Study)}
+以问题 1 中的基线模型为基础，我们系统性地修改了网络架构和训练策略，以评估其对图像生成质量和损失值稳定性的影响。
+
+\subsection*{消融实验 1：生成器通道数翻倍}
+将生成器的通道大小增加到 256、512 和 1024。这大幅增强了生成器学习数据中复杂映射变换的表征能力。
+% TODO: 在此处插入消融实验 1 的损失曲线和图像截图
+\textbf{与基线模型的比较：} [在这里写 1-2 句话，描述图像是否变得更清晰，还是由于生成器参数过多导致初期训练变得更加不稳定。]
+
+\subsection*{消融实验 2：增加判别器容量}
+我们为判别器增加了一个额外的线性层，使判别器的网络层维度变为 [512, 256, 128, 64]，从而增加了判别器的整体容量。
+% TODO: 在此处插入消融实验 2 的损失曲线和图像截图
+\textbf{与基线模型的比较：} [在这里写 1-2 句话，描述判别器是否因此压倒了生成器导致梯度消失，或者两者对抗是否依然均衡使生成质量得到提升。]
+
+\subsection*{消融实验 3：调整判别器更新频率 ($d\_freq = 10$)}
+我们修改了训练循环，设定生成器每更新 1 次，判别器需要预先连续更新 10 次。这确保了判别器在大部分时间内都更接近其理论最优状态。
+% TODO: 在此处插入消融实验 3 的损失曲线和图像截图
+\textbf{与基线模型的比较：} [在这里写 1-2 句话，描述生成器是否因为从训练良好的判别器处获得了更可靠明确的梯度信号，从而学习到了更好的分布形态。]
+
+
+\section*{问题 3：基于 MNIST 的条件 GAN (Conditional GAN)}
+\subsection*{实现细节}
+为了使模型能够按指定条件生图，我们在生成器和判别器中双双引入了 `nn.Embedding(10, 50)` 嵌入层，它能将 10 个离散的数字类别投影为连续的 50 维富语义特征向量。
+在生成器中，映射后的条件向量 $\mathbf{c}$ 沿着特征维度与 100 维的随机噪声向量 $\mathbf{z}$ 直接合并 (concatenate)，从而将一个合并后的 150 维输入送入网络。
+在判别器中，条件向量 $\mathbf{c}$ 则与 784 维的像素展平图像完成合并，使得送入底层线性网络的输入维度变为 834 维。
+
+\subsection*{实验结果}
+% TODO: 在此处插入条件 GAN 的损失曲线，以及按数字类别有序生成的图片集合截图。
+\begin{figure}[H]
+    \centering
+    \rule{10cm}{5cm} % 占位符
+    % \includegraphics[width=0.8\textwidth]{p3_loss.png}
+    \caption{条件 GAN 的 Loss 曲线趋势图}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \rule{10cm}{5cm} % 占位符
+    % \includegraphics[width=0.6\textwidth]{p3_images.png}
+    \caption{带有特定数字类别条件变量生成的 MNIST 样本集}
+\end{figure}
+
+
+\section*{问题 4：关于 GAN 的理论推导}
+
+\subsection*{(a) 最优判别器公式推导}
+Minimax 极小极大博弈的价值函数 (Objective function) 表达如下：
+\begin{equation}
+    V(G, D) = \mathbb{E}_{\mathbf{x} \sim p_{data}}[ \log D(\mathbf{x}) ] + \mathbb{E}_{\mathbf{z} \sim p_z}[ \log(1 - D(G(\mathbf{z}))) ]
+\end{equation}
+利用无意识统计学家法则 (Law of the Unconscious Statistician)，我们可以将第二个针对噪声 $p_z$ 的期望，通过生成器映射改写为基于生成分布 $p_g(\mathbf{x})$ 的形式：
+\begin{equation}
+    V(G, D) = \int_{\mathbf{x}} p_{data}(\mathbf{x}) \log(D(\mathbf{x})) d\mathbf{x} + \int_{\mathbf{x}} p_g(\mathbf{x}) \log(1 - D(\mathbf{x})) d\mathbf{x}
+\end{equation}
+将其合并为同一个积分：
+\begin{equation}
+    V(G, D) = \int_{\mathbf{x}} \Big[ p_{data}(\mathbf{x}) \log(D(\mathbf{x})) + p_g(\mathbf{x}) \log(1 - D(\mathbf{x})) \Big] d\mathbf{x}
+\end{equation}
+为了求解固定生成器 $G$ 下的最优判别器 $D^*_G(\mathbf{x})$，我们必须对于由积分号划定的每个点 $\mathbf{x}$ 将其被积函数最大化。设 $a = p_{data}(\mathbf{x})$, $b = p_g(\mathbf{x})$, 以及 $y = D(\mathbf{x})$。针对变量 $y \in (0,1)$ 的最大化目标函数变为：
+\begin{equation}
+    f(y) = a \log(y) + b \log(1 - y)
+\end{equation}
+对此函数 $f(y)$ 对 $y$ 求导并令其等于零：
+\begin{align*}
+    \frac{df}{dy} = \frac{a}{y} - \frac{b}{1 - y} = 0 \\
+    \frac{a(1 - y) - by}{y(1 - y)} = 0 \\
+    a - ay - by = 0 \\
+    y(a + b) = a \implies y^* = \frac{a}{a + b}
+\end{align*}
+由于该函数的二阶导数恒为负，故该驻点即为全局最大值点。将 $a$ 和 $b$ 还原代入，即可得到最优形式的判别器：
+\begin{equation}
+    D^*_G(\mathbf{x}) = \frac{p_{data}(\mathbf{x})}{p_{data}(\mathbf{x}) + p_g(\mathbf{x})}
+\end{equation}
+
+
+\subsection*{(b) 虚拟训练准则下的全局极小值}
+将已求得的最优判别器 $D^*_G(\mathbf{x})$ 带回至目标方程，可得到仅关于生成器的虚拟训练散度 $C(G)$：
+\begin{equation}
+    C(G) = \max_{D} V(G, D) = \mathbb{E}_{\mathbf{x} \sim p_{data}} \left[ \log \frac{p_{data}(\mathbf{x})}{p_{data}(\mathbf{x}) + p_g(\mathbf{x})} \right] + \mathbb{E}_{\mathbf{x} \sim p_g} \left[ \log \frac{p_g(\mathbf{x})}{p_{data}(\mathbf{x}) + p_g(\mathbf{x})} \right]
+\end{equation}
+为凑成 Kullback–Leibler (KL) 散度的标量形式表达式，我们可以针对对数内的分子成分与分母成分同时除以 2：
+\begin{align*}
+    C(G) &= \mathbb{E}_{\mathbf{x} \sim p_{data}} \left[ \log \left( \frac{1}{2} \cdot \frac{p_{data}(\mathbf{x})}{\frac{p_{data}(\mathbf{x}) + p_g(\mathbf{x})}{2}} \right) \right] + \mathbb{E}_{\mathbf{x} \sim p_g} \left[ \log \left( \frac{1}{2} \cdot \frac{p_{g}(\mathbf{x})}{\frac{p_{data}(\mathbf{x}) + p_g(\mathbf{x})}{2}} \right) \right] \\
+    &= -\log 4 + KL\Big(p_{data} \Big\| \frac{p_{data} + p_g}{2}\Big) + KL\Big(p_g \Big\| \frac{p_{data} + p_g}{2}\Big)
+\end{align*}
+上式中，后两项 KL 散度之和在定义上恰好等于两倍的詹森-香农散度 (Jensen-Shannon Divergence, JSD)：
+\begin{equation}
+    C(G) = -\log 4 + 2 \cdot JSD(p_{data} \| p_g)
+\end{equation}
+根据散理性质规律可知，JS 散度永远非负 ($JSD \geq 0$)，且当且仅当这两个概率分布完全相同时该散度才等于 0。
+因此，当且仅当生成器的映射覆盖真实训练分布时，$p_g = p_{data}$ 此时能获得全局极小值。在此极值点下，$JSD(p_{data} \| p_{data}) = 0$，最终的理论极小值为：
+\begin{equation}
+    C(G) = -\log 4
+\end{equation}
+
+
+\section*{问题 5：离散最优传输中的 Kantorovich-Rubinstein 对偶性推论}
+
+\subsection*{(c) 推导最优对偶形式}
+原始的最优传输 (Optimal Transport, OT) 作为一个线性规划问题可写为：
+\begin{align*}
+    \min_{T \in \mathbb{R}^{k_1 \times k_2}} & \quad \sum_{i,j} T_{ij} c_{ij} \\
+    \text{s.t.} & \quad T_{ij} \geq 0 \\
+                & \quad \sum_{j} T_{ij} = v_i, \quad \forall i \\
+                & \quad \sum_{i} T_{ij} = w_j, \quad \forall j
+\end{align*}
+为了利用 KKT 条件与拉格朗日函数导出该方程的对偶形式，我们为原始规划中的等式约束指派对偶变量（拉格朗日乘子）。分别指派 $\phi_i \in \mathbb{R}$ 用于管理源分布边缘限制 $v_i$，以及 $\psi_j \in \mathbb{R}$ 用于管理目标边缘分布 $w_j$。针对非负约束的 $T_{ij} \geq 0$ ，我们选择通过在极小极大表述中的定义域内对其隐式管理。
+
+据此，建立拉格朗日方程 $L(T, \boldsymbol{\phi}, \boldsymbol{\psi})$：
+\begin{equation}
+    L(T, \boldsymbol{\phi}, \boldsymbol{\psi}) = \sum_{i,j} T_{ij} c_{ij} + \sum_{i} \phi_i \left( v_i - \sum_{j} T_{ij} \right) + \sum_{j} \psi_j \left( w_j - \sum_{i} T_{ij} \right)
+\end{equation}
+提取公因式以对齐合并全部关于 $T_{ij}$ 的关系项：
+\begin{align*}
+    L(T, \boldsymbol{\phi}, \boldsymbol{\psi}) &= \sum_{i,j} T_{ij} (c_{ij} - \phi_i - \psi_j) + \sum_{i} \phi_i v_i + \sum_{j} \psi_j w_j
+\end{align*}
+原始问题相当于 $\min_{T \geq 0} \max_{\boldsymbol{\phi}, \boldsymbol{\psi}} L(T, \boldsymbol{\phi}, \boldsymbol{\psi})$。鉴于这符合单纯线性规划结构，其完全满足强对偶性 (Strong Duality)。根据强对偶性，我们可以安全地调换最小、最大运算符，从而构建如下完全等价的对偶模式：
+\begin{equation}
+    \max_{\boldsymbol{\phi}, \boldsymbol{\psi}} \min_{T \ge 0} L(T, \boldsymbol{\phi}, \boldsymbol{\psi})
+\end{equation}
+现在我们孤立出针对于 $T_{ij} \geq 0$ 的向内最小化约束组件进行分析：
+\begin{equation}
+    \min_{T_{ij} \geq 0} \sum_{i,j} T_{ij} (c_{ij} - \phi_i - \psi_j)
+\end{equation}
+如果针对网络当中的任意配对节点 $(i, j)$，出现了 $(c_{ij} - \phi_i - \psi_j) < 0$ 的境况，那么由于我们要寻找最小值，我们可以直接让此时的 $T_{ij} \to \infty$，那么此处的内部下限就会直接被带向 $-\infty$ 发散（失去意义，也无法求取全局有效最大的解）。因此，为了确保存在一个有效的且有穷的极大上限环境域，该内层被乘数必然只能限制为非负关系：
+\begin{equation}
+    c_{ij} - \phi_i - \psi_j \geq 0 \implies \phi_i + \psi_j \leq c_{ij}, \quad \forall i, j
+\end{equation}
+只有当完全满足该不等式约束时，函数 $T_{ij} (c_{ij} - \phi_i - \psi_j)$ 且在 $T_{ij} \geq 0$ 状况下可提供的最小值刚好精确归于零 0。
+
+经过这一步的逻辑消除后，将求出的极小值结论替换回拉格朗日函数内，此时整个式子中剩余的实质项便只留下了纯粹的拉格朗日乘子对应边缘分布标量的加合了。因此，最终梳理完成的对偶优化问题等价表述确为：
+\begin{align*}
+    \max_{\boldsymbol{\phi}, \boldsymbol{\psi}} & \quad \sum_{i=1}^{k_1} \phi_i v_i + \sum_{j=1}^{k_2} \psi_j w_j \\
+    \text{s.t.} & \quad \phi_i + \psi_j \leq c_{ij} \quad \forall i \in \{1, \dots, k_1\}, j \in \{1, \dots, k_2\}
+\end{align*}
+本结论严谨验证了离散最优传输法则的 Kantorovich-Rubinstein 对偶定理。
+
+\end{document}

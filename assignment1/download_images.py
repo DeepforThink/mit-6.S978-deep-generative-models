@@ -1,0 +1,17 @@
+import urllib.request
+urls = {
+    "ae_results.png": "https://copilotprodattachments.blob.core.windows.net/github-production-copilot-attachments/149588243/c6936019-1254-46f2-933b-2839c7ab558f?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-05T09%3A29%3A03Z&rscd=attachment%3B+filename%3D%22tool-result-image.png%22&rsct=image%2Fpng&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-05T08%3A28%3A58Z&ske=2026-04-05T09%3A29%3A03Z&sks=b&skv=2018-11-09&sig=cp0A4EN4L2hlMAt66jOI%2FAzs%2FPSHCskYoMjNP3IIZbk%3D",
+    "kl_vs_sgvb.png": "https://copilotprodattachments.blob.core.windows.net/github-production-copilot-attachments/149588243/d7d3c8fb-c975-492d-8e7c-7b63401a5efa?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-05T09%3A29%3A03Z&rscd=attachment%3B+filename%3D%22tool-result-image.png%22&rsct=image%2Fpng&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-05T08%3A28%3A58Z&ske=2026-04-05T09%3A29%3A03Z&sks=b&skv=2018-11-09&sig=aGSp%2BoFt4yRyoWwRrl7F5S8ZmDGEvMOsddOJSfH81Xo%3D",
+    "vae_sgvb.png": "https://copilotprodattachments.blob.core.windows.net/github-production-copilot-attachments/149588243/4b4fe481-8be5-43d2-8531-20e63bd28495?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-05T09%3A29%3A03Z&rscd=attachment%3B+filename%3D%22tool-result-image.png%22&rsct=image%2Fpng&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-05T08%3A28%3A58Z&ske=2026-04-05T09%3A29%3A03Z&sks=b&skv=2018-11-09&sig=XwkiPZdM9ThJA6fHJNgGfD9aUOvbjOVjsPF9pjTqzTk%3D",
+    "vae_kl.png": "https://copilotprodattachments.blob.core.windows.net/github-production-copilot-attachments/149588243/9db3b1a7-9c4a-4349-a178-372d06832b91?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-05T09%3A29%3A03Z&rscd=attachment%3B+filename%3D%22tool-result-image.png%22&rsct=image%2Fpng&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-05T08%3A28%3A58Z&ske=2026-04-05T09%3A29%3A03Z&sks=b&skv=2018-11-09&sig=t7Tz8EswZOiJXArMuR8UuU39CbQeYS9%2FvcyUxBQ1PcY%3D",
+    "torus_recon.png": "https://copilotprodattachments.blob.core.windows.net/github-production-copilot-attachments/149588243/19b3f26d-ea47-4c82-bdd4-d3bdca18a4e7?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-05T09%3A29%3A03Z&rscd=attachment%3B+filename%3D%22tool-result-image.png%22&rsct=image%2Fpng&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-05T08%3A28%3A58Z&ske=2026-04-05T09%3A29%3A03Z&sks=b&skv=2018-11-09&sig=35fhlK%2BCiY2rrSe06EMyA4cZUZj6lpshv90Uo136duo%3D",
+    "torus_interp.png": "https://copilotprodattachments.blob.core.windows.net/github-production-copilot-attachments/149588243/cde495cf-475f-4f56-8972-cf957305d2bd?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-05T09%3A29%3A03Z&rscd=attachment%3B+filename%3D%22tool-result-image.png%22&rsct=image%2Fpng&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-05T08%3A28%3A58Z&ske=2026-04-05T09%3A29%3A03Z&sks=b&skv=2018-11-09&sig=OX5b8upe7KT%2BvS7Diqgt28SAcgpjTttF5sisvMwek3E%3D"
+}
+for name, url in urls.items():
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response, open(name, 'wb') as f:
+            f.write(response.read())
+        print(f"Downloaded {name}")
+    except Exception as e:
+        print(f"Failed to download {name}: {e}")

@@ -1,0 +1,24 @@
+# Data
+data/
+*/data/
+*.ubyte
+*.gz
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# LaTeX
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.toc
+*.bbl
+*.blg
