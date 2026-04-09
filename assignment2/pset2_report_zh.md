@@ -41,7 +41,6 @@ $$ NLL(x) = -\sum_{i=1}^T \left( y_i \log(\hat{p}_i) + (1 - y_i) \log(1 - \hat{p
 我们在网络中使用了 1 层 Type A 卷积后接多层 Type B 卷积，并加入 `BatchNorm2d` 与 `ReLU` 激活，最后一层使用 $1 \times 1$ 普通卷积降维至 1 个通道。
 
 **(c) 结果与评估：**
-*(在此处插入你在 Jupyter Notebook 中生成的 2(e) Reconstruction 和 2(f) Generation 的图像截图)*
 - **重建效果 (Reconstruction)**：由于依靠真实的完备上下文，重建质量非常高，几乎复原了原图。
 - **生成效果 (Generation)**：通过逐像素自回归生成，模型能够凭空创造出具有数字基本拓扑特征的图像。
 
@@ -55,7 +54,6 @@ $$ NLL(x) = -\sum_{i=1}^T \left( y_i \log(\hat{p}_i) + (1 - y_i) \log(1 - \hat{p
 代码中，我们使用 `nn.Linear(num_classes, out_channels)`（即代码中的 `cond_proj`）作为 $V_\ell$，将独热编码 $y$ 投影到与特征图对应的通道数。接着使用 `unsqueeze` 进行广播 (Broadcasting) 操作，使一维的条件信号展平并逐通道加到了 $28 \times 28$ 的特征图上，从而实现了基于条件的特征偏置。
 
 **(c) 结果讨论与对比：**
-*(在此处插入 3(e) 和 3(f) 条件生成的图像截图)*
 - **效果对比**：相比于基础的无条件 PixelCNN 生成难以辨认的随机笔划或者交织的数字特征，Conditional PixelCNN 生成的图像严格遵循了我们传入的标签类别。图像排列呈现出完美的规律性（从上到下数字 0 到 9 依次展现）。
 - **结论**：条件生成不仅拥有无条件生成的细节拟合能力，还成功掌握了代表全局语义的宏观类别特征。
 
